@@ -76,3 +76,73 @@ export async function fetchTrainings(): Promise<Training[]> {
     customerName: `${training.customer?.firstname ?? ''} ${training.customer?.lastname ?? ''}`.trim(),
   }));
 }
+
+export async function addCustomer(customer: Omit<Customer, 'id'>): Promise<void> {
+  const response = await fetch(`${BASE_URL}/customers`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(customer),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to add customer');
+  }
+}
+
+export async function updateCustomer(
+  customerId: string,
+  customer: Omit<Customer, 'id'>
+): Promise<void> {
+  const response = await fetch(customerId, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(customer),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to update customer');
+  }
+}
+
+export async function deleteCustomer(customerId: string): Promise<void> {
+  const response = await fetch(customerId, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete customer');
+  }
+}
+
+export async function addTraining(training: {
+  date: string;
+  activity: string;
+  duration: number;
+  customer: string;
+}): Promise<void> {
+  const response = await fetch(`${BASE_URL}/trainings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(training),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to add training');
+  }
+}
+
+export async function deleteTraining(trainingId: string): Promise<void> {
+  const response = await fetch(`${BASE_URL}/trainings/${trainingId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete training');
+  }
+}

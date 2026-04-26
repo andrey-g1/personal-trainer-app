@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { fetchTrainings } from '../services/api';
+import { deleteTraining, fetchTrainings } from '../services/api';
 import type { Training } from '../types/training';
 
 type SortField = 'date' | 'activity' | 'duration' | 'customerName';
@@ -14,25 +14,28 @@ export default function TrainingsPage() {
   const [sortField, setSortField] = useState<SortField>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
-  useEffect(() => {
-    async function loadTrainings() {
-      try {
-        setLoading(true);
-        setError('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
-        const data = await fetchTrainings();
-        setTrainings(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('Something went wrong');
-        }
-      } finally {
-        setLoading(false);
+  async function loadTrainings() {
+    try {
+      setLoading(true);
+      setError('');
+
+      const data = await fetchTrainings();
+      setTrainings(data);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Something went wrong');
       }
+    } finally {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     loadTrainings();
   }, []);
 
@@ -51,6 +54,38 @@ export default function TrainingsPage() {
     }
 
     return sortDirection === 'asc' ? ' ▲' : ' ▼';
+  }
+
+  function handleOpenDeleteConfirm(trainingId: string) {
+    setConfirmDeleteId(trainingId);
+    setError('');
+  }
+
+  function handleCancelDelete() {
+    setConfirmDeleteId(null);
+  }
+
+  async function handleConfirmDelete() {
+    if (!confirmDeleteId) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError('');
+
+      await deleteTraining(confirmDeleteId);
+      await loadTrainings();
+      setConfirmDeleteId(null);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to delete training');
+      }
+    } finally {
+      setDeleting(false);
+    }
   }
 
   const filteredTrainings = trainings.filter((training) => {
@@ -111,6 +146,32 @@ export default function TrainingsPage() {
         />
       </div>
 
+      {confirmDeleteId && (
+        <div className="confirm-box">
+          <p>Delete this training?</p>
+
+          <div className="confirm-actions">
+            <button
+              type="button"
+              className="danger-button"
+              onClick={handleConfirmDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting...' : 'Yes, delete'}
+            </button>
+
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={handleCancelDelete}
+              disabled={deleting}
+            >
+              No, cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {loading && <p>Loading trainings...</p>}
       {error && <p className="error-text">{error}</p>}
 
@@ -134,6 +195,7 @@ export default function TrainingsPage() {
                   <th onClick={() => handleSort('customerName')}>
                     Customer{getSortArrow('customerName')}
                   </th>
+                  <th>Actions</th>
                 </tr>
               </thead>
 
@@ -144,6 +206,15 @@ export default function TrainingsPage() {
                     <td>{training.activity}</td>
                     <td>{training.duration} min</td>
                     <td>{training.customerName}</td>
+                    <td className="actions-cell">
+                      <button
+                        type="button"
+                        className="table-delete-button"
+                        onClick={() => handleOpenDeleteConfirm(training.id)}
+                      >
+                        Delete
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

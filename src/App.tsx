@@ -2,6 +2,7 @@ import { NavLink, Navigate, Route, Routes } from 'react-router-dom';
 import CustomersPage from './pages/CustomersPage';
 import TrainingsPage from './pages/TrainingsPage';
 import CalendarPage from './pages/CalendarPage';
+import StatisticsPage from './pages/StatisticsPage';
 import './index.css';
 
 export default function App() {
@@ -31,6 +32,13 @@ export default function App() {
           >
             Calendar
           </NavLink>
+
+          <NavLink
+            to="/statistics"
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            Statistics
+          </NavLink>
         </nav>
       </header>
 
@@ -40,6 +48,7 @@ export default function App() {
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/trainings" element={<TrainingsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/statistics" element={<StatisticsPage />} />
         </Routes>
       </main>
     </div>

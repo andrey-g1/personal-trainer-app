@@ -286,3 +286,10 @@ page-section {
 .table-train-button:hover {
   background: #047857;
 }
+
+.calendar-wrapper {
+  height: 700px;
+  background: white;
+  padding: 8px;
+  border-radius: 10px;
+}

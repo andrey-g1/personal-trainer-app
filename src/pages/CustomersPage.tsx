@@ -160,6 +160,47 @@ export default function CustomersPage() {
     setError('');
   }
 
+  function escapeCsvValue(value: string) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+
+  function handleExportCsv() {
+    const headers = [
+      'First name',
+      'Last name',
+      'Street address',
+      'Postcode',
+      'City',
+      'Email',
+      'Phone',
+    ];
+
+    const rows = customers.map((customer) => [
+      customer.firstname,
+      customer.lastname,
+      customer.streetaddress,
+      customer.postcode,
+      customer.city,
+      customer.email,
+      customer.phone,
+    ]);
+
+    const csvContent = [
+      headers.map(escapeCsvValue).join(','),
+      ...rows.map((row) => row.map(escapeCsvValue).join(',')),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'customers.csv';
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   async function handleConfirmDelete() {
     if (!confirmDeleteId) {
       return;
@@ -296,6 +337,14 @@ export default function CustomersPage() {
             onChange={(event) => setSearchTerm(event.target.value)}
             className="search-input"
           />
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={handleExportCsv}
+          >
+            Export CSV
+          </button>
 
           <button
             type="button"
